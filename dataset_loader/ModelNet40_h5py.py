@@ -54,15 +54,10 @@ class ModelNet40_h5(data.Dataset):
     def __getitem__(self, idx):
 
         current_points = self.points[idx].copy()
-        print(current_points.shape)
         pt_idxs = np.arange(self.num_points)
-        print(pt_idxs)
         random.shuffle(pt_idxs)
-        print(pt_idxs)
-        print(pt_idxs.shape)
-        # pt_idxs = np.random.randint(low=0, high=current_points.shape[0], size=self.actual_number_of_points)
         pc = current_points[pt_idxs, :]
-        print(pc.shape)
+        # print(pc.shape)
         if self.transforms is not None:
             pc = self.transforms(pc)
         label = self.labels[idx]
