@@ -123,19 +123,21 @@ if __name__ == "__main__":
     else:
         train_set = ModelNet40_h5(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True)
         test_set = ModelNet40_h5(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False)
-        
+
     train_loader = DataLoader(
         train_set,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=2,
-        pin_memory=True
+        pin_memory=True,
+        drop_last=True
     )
     test_loader = DataLoader(
         dataset=test_set,
         batch_size=args.batch_size,
         num_workers=2,
-        pin_memory=True
+        pin_memory=True,
+        drop_last=True
     )
 
     num_classes = train_set.num_classes
