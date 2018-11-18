@@ -40,6 +40,7 @@ class ModelNet40_h5(data.Dataset):
         for f_name in self.files:
             f = h5py.File(os.path.join(self.root, f_name))
             points = f['data'][:]
+            # print(points.shape)
             labels = f['label'][:]
             point_list.append(points)
             label_list.append(labels)
@@ -53,18 +54,22 @@ class ModelNet40_h5(data.Dataset):
     def __getitem__(self, idx):
 
         current_points = self.points[idx].copy()
-        # print(current_points.shape[0])
+        print(current_points.shape)
         pt_idxs = np.arange(self.num_points)
-        pt_idxs = random.shuffle(pt_idxs)
+        print(pt_idxs)
+        random.shuffle(pt_idxs)
+        print(pt_idxs)
+        print(pt_idxs.shape)
         # pt_idxs = np.random.randint(low=0, high=current_points.shape[0], size=self.actual_number_of_points)
-        current_points = current_points[pt_idxs]
+        pc = current_points[pt_idxs, :]
+        print(pc.shape)
         if self.transforms is not None:
-            current_points = self.transforms(current_points)
+            pc = self.transforms(pc)
         label = self.labels[idx]
         label = torch.tensor(label).type(torch.LongTensor)
         index = torch.tensor(idx).type(torch.LongTensor)
 
-        return current_points, label, index
+        return pc, label, index
 
     def __len__(self):
         return self.points.shape[0]
@@ -72,11 +77,10 @@ class ModelNet40_h5(data.Dataset):
 
 if __name__ == '__main__':
     from torchvision import transforms
-    import os, sys
+    import os,sys
+    sys.path.append(os.path.abspath('.'))
     
-    sys.path.append(os.path.join(os.path.abspath('.'), 'data'))
-    print(sys.path)
-    import data_utils as d_utils 
+    import utils.data_utils as d_utils 
 
     transforms = transforms.Compose([
         d_utils.PointcloudToTensor(),
@@ -85,7 +89,9 @@ if __name__ == '__main__':
         d_utils.PointcloudTranslate(),
         d_utils.PointcloudJitter()
     ])
-    train_set = ModelNet40Cls(root = "/home/zeal/work/data/", num_points=16, transforms=transforms, mode=1)
-    test_set = ModelNet40Cls(root = "/home/zeal/work/data/", num_points=16, transforms=transforms, mode=2)
+    train_set = ModelNet40_h5(root = "/home/zeal/work/data/", num_points=1024, transforms=transforms, train=True)
+    test_set = ModelNet40_h5(root = "/home/zeal/work/data/", num_points=1024, transforms=transforms, train=False)
     print(len(train_set))
     print(len(test_set))
+
+    print(train_set[10][0].size())
