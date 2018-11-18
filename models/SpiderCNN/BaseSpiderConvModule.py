@@ -41,7 +41,7 @@ class _BaseSpiderConv(nn.Module):
         B, in_channel, N = feat.size()
         _, _, k = idx.size()
         assert B == self.batch_size and in_channel == self.in_channel and N == self.num_points, \
-            'illegel input size'
+            'illegel input size:{}'.format(feat.size())
         assert k == self.K_knn, 'illegal k'
 
         group_feat = md_utils._indices_group(feat, idx) # B x inchannel x N x k
