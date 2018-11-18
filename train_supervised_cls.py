@@ -23,7 +23,7 @@ torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 
 
-def parse_args(): 
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Arguments for cls training",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
