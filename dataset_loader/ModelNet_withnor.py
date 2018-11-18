@@ -14,10 +14,11 @@ def pc_normalize(pc):
     return pc
 
 class ModelNet40_10_withnor():
-    def __init__(self, root, num_points=1024, train=True, normalize=True, normals=True, modelnet10=False):
+    def __init__(self, root, num_points=1024, transforms=None, train=True, normalize=True, normals=True, modelnet10=False):
         self.root = os.path.join(root, 'modelnet40_normal_resampled')
         self.num_points = num_points
         self.normalize = normalize
+        self.transforms = transforms
         self.train = train
 
         if modelnet10:
@@ -55,7 +56,9 @@ class ModelNet40_10_withnor():
             point_set[:, 0:3] = pc_normalize(point_set[:, 0:3])
         if not self.normals:
             point_set = point_set[:, 0:3]
-        point_set = torch.from_numpy(point_set)
+        # point_set = torch.from_numpy(point_set)
+        if self.transforms is not None:
+            point_set = self.transforms(point_set)
         label = torch.tensor(label).type(torch.LongTensor)
         index = torch.tensor(index).type(torch.LongTensor)
         return point_set, label, index

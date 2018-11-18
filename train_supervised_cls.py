@@ -19,6 +19,7 @@ from utils.BnMomentunScheduler import BnmomentumScheduler
 from utils.Trainer import Trainer_cls
 
 from dataset_loader.ModelNet40_h5py import ModelNet40_h5
+from dataset_loader.ModelNet_withnor import ModelNet40_10_withnor
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
@@ -78,6 +79,10 @@ def parse_args():
         help='pointnet or dgcnn or spidercnn'
     )
     parser.add_argument(
+        '--withnor', action='store_true', default=False,
+        help='whether to use normals'
+    )
+    parser.add_argument(
         '--optim', type=str, default='adam',
         help='what kind of optimizer to use, adam, sgd'
     )
@@ -112,7 +117,13 @@ if __name__ == "__main__":
     transforms_test = transforms.Compose([
         d_utils.PointcloudToTensor()
     ])
-    train_set = ModelNet40_h5(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True)
+    if args.withnor:
+        train_set = ModelNet40_10_withnor(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True)
+        test_set = ModelNet40_10_withnor(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False)
+    else:
+        train_set = ModelNet40_h5(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True)
+        test_set = ModelNet40_h5(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False)
+        
     train_loader = DataLoader(
         train_set,
         batch_size=args.batch_size,
@@ -120,8 +131,6 @@ if __name__ == "__main__":
         num_workers=2,
         pin_memory=True
     )
-
-    test_set = ModelNet40_h5(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False)
     test_loader = DataLoader(
         dataset=test_set,
         batch_size=args.batch_size,
