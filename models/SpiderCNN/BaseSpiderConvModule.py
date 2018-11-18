@@ -1,10 +1,10 @@
 import os,sys
 sys.path.append(os.path.abspath('.'))
-print(sys.path)
+# print(sys.path)
 import torch
 import torch.nn as nn
 import utils.pytorch_utils as pt_utils
-from models import md_utils
+import models.model_utils as md_utils
 
 
 class _BaseSpiderConv(nn.Module):
@@ -13,6 +13,7 @@ class _BaseSpiderConv(nn.Module):
         self.K_knn = K_knn
         self.batch_size = batch_size
         self.in_channel = in_channel
+        self.taylor_channel = taylor_channel
         self.num_points = num_points
 
         self.weights = torch.nn.Parameter(
@@ -61,7 +62,7 @@ class _BaseSpiderConv(nn.Module):
             XY, XZ, YZ, XXY, XXZ, YYZ, YYX, ZZX, ZZY, XYZ
         ], dim=1) # B x 20 x N x k
 
-        group_XYZ = group_XYZ.unsqueeze(-1)
+        group_XYZ = group_XYZ.unsqueeze(2)
         
         taylor = torch.mul(self.weights, group_XYZ)
         taylor = torch.sum(taylor, dim=1) # B x taylor_channel x N x k
@@ -80,7 +81,6 @@ class _BaseSpiderConv(nn.Module):
 
 
 if __name__ == '__main__':
-    import models.model_utils as md_utils
     in_channel = 3
     out_channel = 6
     taylor_channel = 9

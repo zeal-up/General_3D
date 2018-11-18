@@ -8,6 +8,7 @@ from torchvision import transforms
 import os
 
 from models.DGCNN.Dgcnn_cls import DGCNN_cls_fullnet
+from models.SpiderCNN.SpiderCNN_cls import Spidercnn_cls_fullnet
 
 import utils.pytorch_utils as pt_utils
 import utils.data_utils as d_utils
@@ -74,7 +75,7 @@ def parse_args():
     )
     parser.add_argument(
         '--model-name', type=str, default='dgcnn',
-        help='pointnet or dgcnn or dgcnn_jiehong'
+        help='pointnet or dgcnn or spidercnn'
     )
     parser.add_argument(
         '--optim', type=str, default='adam',
@@ -132,6 +133,8 @@ if __name__ == "__main__":
 
     if args.model_name == 'dgcnn':
         model = DGCNN_cls_fullnet(num_classes=num_classes)
+    elif args.model_name == 'spidercnn':
+        model = Spidercnn_cls_fullnet(withnor=True, batch_size=args.batch_size, num_points=args.num_points, num_classes=num_classes)
     else:
         assert False, 'illegal model name'
     model = nn.DataParallel(model)
