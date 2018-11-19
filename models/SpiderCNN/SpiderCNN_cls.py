@@ -20,8 +20,7 @@ class Spidercnn_cls_feature(nn.Module):
         super().__init__()
         self.K_knn = K_knn
         self.withnor = withnor
-        self.batch_size = batch_size
-        self.num_points = num_points
+
         self.taylor_channel = taylor_channel
         self.inchannel = 6 if withnor else 3
         self.spiderconv1 = _BaseSpiderConv(self.inchannel, 32, self.taylor_channel, self.K_knn)
