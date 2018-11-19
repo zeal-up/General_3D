@@ -318,7 +318,7 @@ class Trainer_seg(object):
                     pred_val[j,:] = np.argmax(logits[:,seg_classes[cat]], 1) + seg_classes[cat][0]
                 correct = np.sum(pred_val == target)
                 total_correct += correct
-                total_seen += (batch_size*test_output.shape[2]) # batch_size*num_points
+                total_seen += (batch_size*test_output.shape[1]) # batch_size*num_points
 
                 for l in range(len(seg_classes)):
                     total_seen_class[l] += np.sum(target==l)

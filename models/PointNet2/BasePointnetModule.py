@@ -64,6 +64,44 @@ class _BasePointnetMSGModule(nn.Module):
         return pc_sample, cat_feat
 
 
+class PointnetFPModule(nn.Module):
+    def __init__(self, mlp:list[int]):
+        super().__init__()
+        self.mlp = pt_utils.SharedMLP(mlp, bn=True)
+
+    def forward(self, pc_down, pc_up, feat_down, feat_up):
+        '''
+        pc_down : B x 3 x N_small
+        pc_up : B x 3 x N_large
+
+        feat_down : B x C1 x N_small
+        feat_up : B x C2 x N_large
+
+        return : B x mlp[-1] x N_large
+
+        '''
+        idx, dist = md_utils._knn_indices(
+            feat=pc_down,
+            k=3,
+            centroid=pc_up,
+            dist=True
+        ) # B x N_large x k
+
+        dist_recip = 1.0 / (dist + 1e-8)
+        norm = torch.sum(dist_recip, dim=2, keepdim=True)
+        weight = dist_recip / norm
+        grouped_feat = md_utils._indices_group(feat_down, idx) # B x C1 x N_large x k
+        weight = weight.unsqueeze(1) # B x 1 x N_large x k
+
+        interpolated_feats = grouped_feat * weight
+        interpolated_feats = torch.max(interpolated_feats, dim=-1)[0] # B x C1 x N_large
+
+        interpolated_feats = torch.cat([interpolated_feats, feat_up], dim=1) # B x C1+C2 x N_large
+        interpolated_feats = interpolated_feats.unsqueeze(-1)
+
+        interpolated_feats = self.mlp(interpolated_feats)
+
+        return interpolated_feats.squeeze(-1) # B x out_channel x N_large
 
 
 

@@ -3,21 +3,36 @@ import time
 
 
 
-def _knn_indices(feat, k):
+def _knn_indices(feat, k, centroid=None, dist=False):
     '''
     feat : B x C x N
+    centroid : B x C x n
+    dist : whether return dist value
     k : int
 
     return 
-    knn_indices : B x N x k
+    knn_indices : B x n x k
+    dist : B x n x dist
     '''
-    r_a = torch.sum(feat.pow(2), dim=1, keepdim=True)
-    dis = torch.bmm(feat.transpose(1,2), feat).mul_(-2)
-    dis.add_(r_a.transpose(1,2) + r_a)
+    if centroid is None:
+        centroid = feat
+    pow2_feat = torch.sum(feat.pow(2), dim=1, keepdim=True) # B x 1 x N
+    pow2_centroid = torch.sum(centroid.pow(2), dim=1, keepdim=True) # B x 1 x n
+    centroid_feat = torch.bmm(centroid.transpose(1,2), feat).mul_(-2) # B x n x N
+    pow2_centroid = pow2_centroid.permute(0, 2, 1)
+    distances = centroid_feat + pow2_centroid + pow2_feat
+    k_dist, indices = torch.topk(distances, k, dim=-1, largest=False, sorted=False)
+    if dist:
+        return indices, k_dist
+    else:
+        return indices
+    # r_a = torch.sum(feat.pow(2), dim=1, keepdim=True)
+    # dis = torch.bmm(feat.transpose(1,2), feat).mul_(-2)
+    # dis.add_(r_a.transpose(1,2) + r_a)
 
-    _, indices = torch.topk(dis, k, dim=-1, largest=False, sorted=False)
+    # _, indices = torch.topk(dis, k, dim=-1, largest=False, sorted=False)
 
-    return indices
+    # return indices
 
 def _indices_group(feat, indices):
     '''
