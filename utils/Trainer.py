@@ -233,15 +233,18 @@ class Trainer_seg(object):
                         self._checkpoint(epoch, train_loss.avg, 0, name=os.path.join(saved_path, 'best_model.pth'))
                         self.best_train_loss = train_loss.avg
                 else: # valuation per epoch
-                    mIoUs, cat_IoUs = self.evaluation(test_loader, loader_fn=loader_fn)
+                    mIoUs, mpIoUs, oAcc, cAcc, cat_IoUs  = self.evaluation(test_loader, loader_fn=loader_fn)
                     x_axis = epoch+1
                     print('Epoch {} finished |train_loss:{:.4f}  |  mIoUs:{:.2f}'.\
                         format(epoch, train_loss.avg, mIoUs))
-                    self.viz.append_acc(mIoUs, x_axis, win_name='mIoUs_win', id='mIoUs')
+                    self.viz.append_acc(mIoUs, x_axis, win_name='IoUs_win', id='mIoUs')
+                    self.viz.append_acc(mpIoUs, x_axis, win_name='IoUs_win', id='mpIoUs')
+                    self.viz.append_acc(oAcc, x_axis, win_name='acc_win', id='oAcc')
+                    self.viz.append_acc(cAcc, x_axis, win_name='acc_win', id='cAcc')
                     self.viz.append_text(cat_IoUs, win_name='IoUs for each category')
                     
                     if mIoUs > self.best_val_mIoUs :
-                        self._checkpoint(epoch, 0, mIoUs*100, name=os.path.join(saved_path, 'best_model.pth'))
+                        self._checkpoint(epoch, 0, mIoUs, name=os.path.join(saved_path, 'best_model.pth'))
                         self.best_val_mIoUs = mIoUs
                 train_loss.reset()
 
@@ -282,8 +285,13 @@ class Trainer_seg(object):
 		# test_loader.dataset.seg_label_to_classes = {} # {0:Airplane, 1:Airplane, ...49:Table}
         seg_classes = test_loader.dataset.seg_classes
         seg_label_to_classes = test_loader.dataset.seg_label_to_classes
+        total_correct = 0
+        total_seen = 0
+        total_seen_class = [0 for _ in range(len(seg_classes))]
+        total_correct_class = [0 for _ in range(len(seg_classes))]
+        shape_ious = {cat:[] for cat in seg_classes.keys()}
         with torch.no_grad():
-            shape_ious = {cat:[] for cat in seg_classes.keys()}
+            
             self.model.eval()
 
             for batch_data in test_loader:
@@ -308,6 +316,14 @@ class Trainer_seg(object):
                     cat = seg_label_to_classes[target[j,0]]
                     logits = test_output[j,:,:]
                     pred_val[j,:] = np.argmax(logits[:,seg_classes[cat]], 1) + seg_classes[cat][0]
+                correct = np.sum(pred_val == target)
+                total_correct += correct
+                total_seen += (batch_size*test_output.size()[2]) # batch_size*num_points
+
+                for l in range(len(seg_classes)):
+                    total_seen_class[l] += np.sum(target==l)
+                    total_correct_class[l] += (np.sum((pred_val==l) & (target==l)))
+
 
                 for k in range(batch_size):
                     segp = pred_val[k,:]
@@ -328,8 +344,15 @@ class Trainer_seg(object):
                 cat_ious[cat] = np.mean(shape_ious[cat])
 
             mIoUs = np.mean(all_shape_ious)
+            mpIoUs = np.mean(cat_ious.values())
+            oAcc = total_correct / float(total_seen)
+            cAcc = np.mean(np.array(total_correct_class) / np.array(total_seen_class, dtype=np.float))
 
-        return mIoUs, str(cat_ious) #mIoUs, IoU for each category
+        return mIoUs*100, mpIoUs*100, oAcc*100, cAcc*100, str(cat_ious) 
+        #mIoUs : average IoU over all shapes
+        #mpIoUs : average IoU over all category
+        #oAcc : average accuracy over all points
+        #cAcc : average accuracy over all parts
 
     def _checkpoint(self, epoch, loss, mIoUs, name='./checkpoints/best_model.pth',):
         torch.save(self.model.state_dict(), name)
