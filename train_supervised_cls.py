@@ -9,7 +9,7 @@ import os
 
 from models.DGCNN.Dgcnn_cls import DGCNN_cls_fullnet
 from models.SpiderCNN.SpiderCNN_cls import Spidercnn_cls_fullnet
-
+from models.PointNet2.Pointnet2_cls import Pointnet2MSG_cls_fullnet
 import utils.pytorch_utils as pt_utils
 import utils.data_utils as d_utils
 import argparse
@@ -76,7 +76,7 @@ def parse_args():
     )
     parser.add_argument(
         '--model-name', type=str, default='dgcnn',
-        help='pointnet or dgcnn or spidercnn'
+        help='pointnet2 or dgcnn or spidercnn'
     )
     parser.add_argument(
         '--withnor', action='store_true', default=False,
@@ -144,6 +144,8 @@ if __name__ == "__main__":
         model = DGCNN_cls_fullnet(num_classes=num_classes)
     elif args.model_name == 'spidercnn':
         model = Spidercnn_cls_fullnet(withnor=True, num_classes=num_classes)
+    elif args.model_name == 'pointnet2':
+        model = Pointnet2MSG_cls_fullnet(num_classes=num_classes)
     else:
         assert False, 'illegal model name'
     model = nn.DataParallel(model)

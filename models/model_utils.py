@@ -23,19 +23,19 @@ def _indices_group(feat, indices):
     '''
     input
     feat : B x C x N
-    indices : B x N x k
+    indices : B x n x k
 
     output
     group_feat : B x C x N x k
     '''
     B, C, N = feat.size()
-    _, _, k = indices.size()
+    _, n, k = indices.size()
 
-    indices = indices.unsqueeze(1).expand(B, C, N, k)
+    indices = indices.unsqueeze(1).expand(B, C, n, k)
     group_feat = feat.unsqueeze(-1).expand(B, C, N, k)
     group_feat = torch.gather(group_feat, 2, indices)
 
-    return group_feat
+    return group_feat # B x C x n x k
 
 def _knn_group(feat, k):
     '''
