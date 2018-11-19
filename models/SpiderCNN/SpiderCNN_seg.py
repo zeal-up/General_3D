@@ -102,4 +102,4 @@ class Spidercnn_seg_fullnet(nn.Module):
 
         scores = self.classifier(global_point_feat)
 
-        return scores
+        return scores.squeeze(-1) # B x num_parts x N
