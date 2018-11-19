@@ -16,12 +16,10 @@ class _BaseSpiderConv(nn.Module):
         self.taylor_channel = taylor_channel
         self.num_points = num_points
 
-        self.weights = torch.nn.Parameter(
-            torch.empty(batch_size, 20, taylor_channel, num_points, K_knn)
-        )
-        nn.init.xavier_uniform_(self.weights)
+        
+        self.conv1 = pt_utils.Conv2d(19, self.taylor_channel, bn=False, activation=None)
 
-        self.conv = pt_utils.Conv2d(
+        self.conv2 = pt_utils.Conv2d(
             in_channel*taylor_channel,
             out_channel,
             kernel_size=[1, K_knn],
@@ -55,17 +53,15 @@ class _BaseSpiderConv(nn.Module):
         XY, XZ, YZ = X*Y, X*Z, Y*Z
         XXY, XXZ, YYZ, YYX, ZZX, ZZY, XYZ = X*XY, X*XZ, Y*YZ, Y*XY, Z*XZ, Z*YZ, XY*Z
 
-        weight_1 = torch.ones_like(X)
 
         group_XYZ = torch.cat([
-            weight_1, X, Y, Z, XX, YY, ZZ, XXX, YYY, ZZZ,\
+            X, Y, Z, XX, YY, ZZ, XXX, YYY, ZZZ,\
             XY, XZ, YZ, XXY, XXZ, YYZ, YYX, ZZX, ZZY, XYZ
         ], dim=1) # B x 20 x N x k
 
         group_XYZ = group_XYZ.unsqueeze(2)
         
-        taylor = torch.mul(self.weights, group_XYZ)
-        taylor = torch.sum(taylor, dim=1) # B x taylor_channel x N x k
+        taylor = self.conv1(group_XYZ) # B x taylor_channel x N x k
 
         group_feat = group_feat.unsqueeze(2) #B x inchannel x 1 x N x k
         taylor = taylor.unsqueeze(1) # B x 1 x taylor_channel x N x k

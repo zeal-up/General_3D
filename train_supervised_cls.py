@@ -135,8 +135,7 @@ if __name__ == "__main__":
         dataset=test_set,
         batch_size=args.batch_size,
         num_workers=2,
-        pin_memory=True,
-        drop_last=True
+        pin_memory=True
     )
 
     num_classes = train_set.num_classes

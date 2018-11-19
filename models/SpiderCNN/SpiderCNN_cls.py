@@ -34,7 +34,6 @@ class Spidercnn_cls_feature(nn.Module):
         pc_withnor : B x N x 6
         or pc_withoutnor : B x N x3
         '''
-        print(pc.size())
         assert pc.size()[2] == self.inchannel, 'illegal input pc size:{}'.format(pc.size())
         B, N, _ = pc.size()
         pc = pc.permute(0, 2, 1)
@@ -45,7 +44,6 @@ class Spidercnn_cls_feature(nn.Module):
         grouped_pc = pc_xyz.unsqueeze(-1).expand(B, 3, N, self.K_knn)
         grouped_pc = grouped_xyz - grouped_pc
 
-        print('pc.size is ', pc.size())
         feat_1 = self.spiderconv1(pc, idx, grouped_pc) # B x 64 x N
         feat_2 = self.spiderconv2(feat_1, idx, grouped_pc)
         feat_3 = self.spiderconv3(feat_2, idx, grouped_pc)
