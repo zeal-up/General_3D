@@ -9,6 +9,7 @@ import os
 import argparse
 
 from models.DGCNN.Dgcnn_seg import DGCNN_seg_fullnet
+from models.SpiderCNN.SpiderCNN_seg import Spidercnn_seg_fullnet
 
 import utils.pytorch_utils as pt_utils
 import utils.data_utils as d_utils
@@ -74,7 +75,7 @@ def parse_args():
     )
     parser.add_argument(
         '--model-name', type=str, default='dgcnn',
-        help='pointnet or dgcnn '
+        help='pointnet or dgcnn, spidercnn '
     )
 
     parser.add_argument('--visdom-port', type=int, default=8197)
@@ -118,6 +119,8 @@ if __name__ == "__main__":
 	# model
     if args.model_name == 'dgcnn':
         model = DGCNN_seg_fullnet(num_parts=50, num_classes=16)
+    elif args.model_name == 'spidercnn':
+        model = Spidercnn_seg_fullnet(num_parts=50)
     else:
         pass
 
