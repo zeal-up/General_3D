@@ -6,17 +6,18 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from torchvision import transforms
 import os
-
-from models.Dgcnn_seg import DGCNN_segmentation
-
-import utils.pytorch_utils as pt_utils
-import data.data_utils as d_utils
 import argparse
 
-from my_utils.Plot import Visdom_Plot
-from my_utils.trainer import Trainer_seg
-from my_utils.BnMomentunScheduler import BnmomentumScheduler
-from my_utils.ShapenetPart import ShapenetPartDataset
+from models.DGCNN.Dgcnn_seg import DGCNN_seg_fullnet
+
+import utils.pytorch_utils as pt_utils
+import utils.data_utils as d_utils
+
+
+from utils.Plot import Visdom_Plot
+from utils.Trainer import Trainer_seg
+from utils.BnMomentunScheduler import BnmomentumScheduler
+from dataset_loader.ShapenetPart import ShapenetPartDataset 
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
@@ -56,7 +57,7 @@ def parse_args():
         help="pre-trained model path"
     )
     parser.add_argument(
-        '--saved-path', type=str, default='./supervised_models/', 
+        '--saved-path', type=str, default='./segmentation_models/', 
         help='path to save model'
     )
     parser.add_argument(
@@ -73,7 +74,7 @@ def parse_args():
     )
     parser.add_argument(
         '--model-name', type=str, default='dgcnn',
-        help='pointnet or dgcnn or dgcnn_jiehong'
+        help='pointnet or dgcnn '
     )
 
     parser.add_argument('--visdom-port', type=int, default=8197)
@@ -116,7 +117,7 @@ if __name__ == "__main__":
 
 	# model
     if args.model_name == 'dgcnn':
-        model = DGCNN_segmentation(num_parts=50, num_classes=16)
+        model = DGCNN_seg_fullnet(num_parts=50, num_classes=16)
     else:
         pass
 
