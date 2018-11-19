@@ -54,6 +54,7 @@ class Spidercnn_seg_feature(nn.Module):
 
 class Spidercnn_seg_classifier(nn.Module):
     def __init__(self, num_parts:int=50):
+        super().__init__()
         self.num_parts = 50
         self.drop = nn.Dropout2d(p=0.2)
         self.fc1 = pt_utils.Conv2d(1456, 256, bn=True)
