@@ -66,7 +66,7 @@ class _BaseSpiderConv(nn.Module):
 
         group_feat = torch.mul(group_feat, taylor).view(B, self.in_channel*self.taylor_channel, N, k)
 
-        group_feat = self.conv(group_feat) # B x out_channel x N x 1
+        group_feat = self.conv2(group_feat) # B x out_channel x N x 1
 
         group_feat = group_feat.squeeze(-1)
 
