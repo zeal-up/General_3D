@@ -34,6 +34,7 @@ class Spidercnn_cls_feature(nn.Module):
         pc_withnor : B x N x 6
         or pc_withoutnor : B x N x3
         '''
+        print(pc.size())
         assert pc.size()[2] == self.inchannel, 'illegal input pc size:{}'.format(pc.size())
         B, N, _ = pc.size()
         pc = pc.permute(0, 2, 1)
