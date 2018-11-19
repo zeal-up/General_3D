@@ -16,7 +16,7 @@ class Spidercnn_cls_feature(nn.Module):
     return 
     feature : B x C
     '''
-    def __init__(self, K_knn:int=20, withnor=True, batch_size:int=32, num_points:int=1024, taylor_channel:int=3):
+    def __init__(self, K_knn:int=20, withnor=True, taylor_channel:int=3):
         super().__init__()
         self.K_knn = K_knn
         self.withnor = withnor
@@ -24,10 +24,10 @@ class Spidercnn_cls_feature(nn.Module):
         self.num_points = num_points
         self.taylor_channel = taylor_channel
         self.inchannel = 6 if withnor else 3
-        self.spiderconv1 = _BaseSpiderConv(self.inchannel, 32, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
-        self.spiderconv2 = _BaseSpiderConv(32, 64, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
-        self.spiderconv3 = _BaseSpiderConv(64, 128, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
-        self.spiderconv4 = _BaseSpiderConv(128, 256, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
+        self.spiderconv1 = _BaseSpiderConv(self.inchannel, 32, self.taylor_channel, self.K_knn)
+        self.spiderconv2 = _BaseSpiderConv(32, 64, self.taylor_channel, self.K_knn)
+        self.spiderconv3 = _BaseSpiderConv(64, 128, self.taylor_channel, self.K_knn)
+        self.spiderconv4 = _BaseSpiderConv(128, 256, self.taylor_channel, self.K_knn)
 
     def forward(self, pc):
         '''
@@ -72,10 +72,10 @@ class Spidercnn_cls_classifier(nn.Module):
         return feat
 
 class Spidercnn_cls_fullnet(nn.Module):
-    def __init__(self, K_knn:int=20, withnor=True, batch_size:int=32, num_points:int=1024, taylor_channel:int=3, num_classes:int=40):
+    def __init__(self, K_knn:int=20, withnor=True, taylor_channel:int=3, num_classes:int=40):
         super().__init__()
 
-        self.feature_extractor = Spidercnn_cls_feature(K_knn, withnor, batch_size, num_points, taylor_channel)
+        self.feature_extractor = Spidercnn_cls_feature(K_knn, withnor, taylor_channel)
         self.classifier = Spidercnn_cls_classifier(num_classes)
 
     def forward(self, pc):
