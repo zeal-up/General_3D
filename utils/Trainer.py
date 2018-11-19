@@ -344,7 +344,7 @@ class Trainer_seg(object):
                 cat_ious[cat] = np.mean(shape_ious[cat])
 
             mIoUs = np.mean(all_shape_ious)
-            mpIoUs = np.mean(cat_ious.values())
+            mpIoUs = np.mean(list(cat_ious.values()))
             oAcc = total_correct / float(total_seen)
             cAcc = np.mean(np.array(total_correct_class) / np.array(total_seen_class, dtype=np.float))
 
