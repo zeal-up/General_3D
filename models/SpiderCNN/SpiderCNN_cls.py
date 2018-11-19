@@ -23,8 +23,8 @@ class Spidercnn_cls_feature(nn.Module):
         self.batch_size = batch_size
         self.num_points = num_points
         self.taylor_channel = taylor_channel
-        inchannel = 6 if withnor else 3
-        self.spiderconv1 = _BaseSpiderConv(inchannel, 32, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
+        self.inchannel = 6 if withnor else 3
+        self.spiderconv1 = _BaseSpiderConv(self.inchannel, 32, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
         self.spiderconv2 = _BaseSpiderConv(32, 64, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
         self.spiderconv3 = _BaseSpiderConv(64, 128, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
         self.spiderconv4 = _BaseSpiderConv(128, 256, self.taylor_channel, self.batch_size, self.num_points, self.K_knn)
@@ -34,10 +34,7 @@ class Spidercnn_cls_feature(nn.Module):
         pc_withnor : B x N x 6
         or pc_withoutnor : B x N x3
         '''
-        if self.withnor:
-            assert pc.size()[2] == 6, 'the input size is wrong'
-        else:
-            assert pc.size()[2] == 3, 'the input size is wrong'
+        assert pc.size()[2] == self.inchannel, 'illegal input pc size:{}'.format(pc.size())
         B, N, _ = pc.size()
         pc = pc.permute(0, 2, 1)
         pc_xyz = pc[:, 0:3, :]
@@ -47,6 +44,7 @@ class Spidercnn_cls_feature(nn.Module):
         grouped_pc = pc_xyz.unsqueeze(-1).expand(B, 3, N, self.K_knn)
         grouped_pc = grouped_xyz - grouped_pc
 
+        print('pc.size is ', pc.size())
         feat_1 = self.spiderconv1(pc, idx, grouped_pc) # B x 64 x N
         feat_2 = self.spiderconv2(feat_1, idx, grouped_pc)
         feat_3 = self.spiderconv3(feat_2, idx, grouped_pc)

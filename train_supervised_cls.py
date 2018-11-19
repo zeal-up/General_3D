@@ -106,7 +106,6 @@ if __name__ == "__main__":
 
     transforms_train = transforms.Compose([
         d_utils.PointcloudToTensor(),
-
         d_utils.PointcloudRotate(),
         d_utils.PointcloudJitter(),
         d_utils.PointcloudScale(),
