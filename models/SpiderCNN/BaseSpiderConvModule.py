@@ -58,7 +58,6 @@ class _BaseSpiderConv(nn.Module):
             XY, XZ, YZ, XXY, XXZ, YYZ, YYX, ZZX, ZZY, XYZ
         ], dim=1) # B x 20 x N x k
 
-        group_XYZ = group_XYZ.unsqueeze(2)
         
         taylor = self.conv1(group_XYZ) # B x taylor_channel x N x k
 
