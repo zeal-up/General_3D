@@ -143,7 +143,7 @@ if __name__ == "__main__":
     if args.model_name == 'dgcnn':
         model = DGCNN_cls_fullnet(num_classes=num_classes)
     elif args.model_name == 'spidercnn':
-        model = Spidercnn_cls_fullnet(withnor=True, batch_size=args.batch_size, num_points=args.num_points, num_classes=num_classes)
+        model = Spidercnn_cls_fullnet(withnor=True, num_classes=num_classes)
     else:
         assert False, 'illegal model name'
     model = nn.DataParallel(model)
