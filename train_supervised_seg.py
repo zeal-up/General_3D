@@ -74,6 +74,10 @@ def parse_args():
         help="Number of points to train with. Default is 4096"
     )
     parser.add_argument(
+        "--withnor", action='store_true', default=False,
+        help="whether to use normals"
+    )
+    parser.add_argument(
         '--model-name', type=str, default='dgcnn',
         help='pointnet or dgcnn, spidercnn '
     )
@@ -96,7 +100,7 @@ if __name__ == "__main__":
     np.random.seed(10)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    train_dataset = ShapenetPartDataset('./dataset/', phase='trainval', return_one_hot=True)
+    train_dataset = ShapenetPartDataset('./dataset/', phase='trainval', return_one_hot=True, normal=args.withnor)
     train_loader = DataLoader(
         train_dataset, 
         batch_size=args.batch_size, 
@@ -106,7 +110,7 @@ if __name__ == "__main__":
         pin_memory=True
         )
 
-    test_dataset = ShapenetPartDataset('./dataset/', phase='test', return_one_hot=True)
+    test_dataset = ShapenetPartDataset('./dataset/', phase='test', return_one_hot=True, normal=args.withnor)
     test_loader = DataLoader(
         test_dataset, 
         batch_size=args.batch_size, 
