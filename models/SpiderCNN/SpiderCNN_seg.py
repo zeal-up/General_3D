@@ -88,9 +88,11 @@ class Spidercnn_seg_fullnet(nn.Module):
         output : B x num_parts x N
         '''
         pc = batch_data['pc'] # B x N x 6/3
-        one_hot_labels = batch_data['one_hot_labels'] # B x N x num_classes(16)
-        one_hot_labels = one_hot_labels.permute(0, 2, 1)
+        one_hot_labels = batch_data['one_hot_labels'] # B x num_classes(16)
+        _, num_classes = one_hot_labels.size()
         B, N, _ = pc.size()
+        one_hot_labels = one_hot_labels.unsqueeze(-1).expand(B, num_classes, N)
+        
 
         global_feat, point_feat = self.feature_extractor(pc) # B x 960; B x 480 x N
         global_feat = global_feat.unsqueeze(-1).expand(B, 960, N)
