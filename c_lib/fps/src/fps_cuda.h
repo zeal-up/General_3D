@@ -1,0 +1,1 @@
+int fps_forward_cuda(int num_sample_points, THCudaTensor * input, THCudaTensor *temp, THCudaLongTensor * output);
