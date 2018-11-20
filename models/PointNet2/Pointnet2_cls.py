@@ -29,7 +29,8 @@ class PointNet2MSG_cls_feature(nn.Module):
 
         inchannel = 128 + 256 + 256 + 3
 
-        self.SA = pt_utils.SharedMLP([inchannel, 256, 512, 1024], bn=True)
+        self.SA = pt_utils.SharedMLP([inchannel, 256, 512], bn=True)
+        self.last_layer = pt_utils.Conv2d(512, 1024, bn=True)
 
     def forward(self, pc):
         '''
@@ -46,7 +47,8 @@ class PointNet2MSG_cls_feature(nn.Module):
 
         pc_sample, feat = pc_sample.unsqueeze(-1), feat.unsqueeze(-1)
 
-        feat = self.SA(torch.cat([pc_sample, feat], dim=1)) # B x 1024 x npoint x 1
+        feat = self.SA(torch.cat([pc_sample, feat], dim=1)) 
+        feat = self.last_layer(feat) # B x 1024 x npoint x 1
 
         feat = feat.squeeze(-1)
         feat = torch.max(feat, -1)[0]
@@ -64,7 +66,9 @@ class PointNet2SSG_cls_feature(nn.Module):
         self.ssg2 = _BasePointnetSSGModule(128, 0.4, 64, [inchannel, 128, 128, 256])
 
         inchannel = 256 + 3
-        self.SA = pt_utils.SharedMLP([inchannel, 256, 512, 1024], bn=True)
+        self.SA = pt_utils.SharedMLP([inchannel, 256, 512], bn=True)
+
+        self.last_layer = pt_utils.Conv2d(512, 1024, bn=True)
 
     def forward(self, pc):
         assert pc.size()[2] == 3, 'illegal pc size : {}'.format(pc.size())
@@ -75,13 +79,14 @@ class PointNet2SSG_cls_feature(nn.Module):
 
         pc_sample, feat = pc_sample.unsqueeze(-1), feat.unsqueeze(-1)
         feat = self.SA(torch.cat([pc_sample, feat], dim=1))
+        feat = self.last_layer(feat) # B x 1024 x N x 1
         feat = feat.squeeze(-1)
         feat = torch.max(feat, -1)[0]
 
         return feat
 
 
-class Pointnet2MSG_cls_classifier(nn.Module):
+class Pointnet2_cls_classifier(nn.Module):
     def __init__(self, num_classes:int=40):
         super().__init__()
 
@@ -99,13 +104,26 @@ class Pointnet2MSG_cls_classifier(nn.Module):
         return feat
 
 
+class Pointnet2SSG_cls_fullnet(nn.Module):
+    def __init__(self, num_classes:int=40):
+        super().__init__()
+
+        self.feature_extractor = PointNet2SSG_cls_feature()
+        self.classifier = Pointnet2_cls_classifier(num_classes=num_classes)
+
+    def forward(self, pc):
+        feat = self.feature_extractor(pc)
+        feat = self.classifier(pc)
+
+        return feat
+
 class Pointnet2MSG_cls_fullnet(nn.Module):
     def __init__(self, num_classes:int=40):
         super().__init__()
 
         self.num_classes = num_classes
         self.feature_extractor = PointNet2MSG_cls_feature()
-        self.classifier = Pointnet2MSG_cls_classifier(num_classes=self.num_classes)
+        self.classifier = Pointnet2_cls_classifier(num_classes=self.num_classes)
 
     def forward(self, pc):
         feat = self.feature_extractor(pc)
