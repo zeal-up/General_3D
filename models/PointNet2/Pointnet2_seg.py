@@ -42,8 +42,8 @@ class Pointnet2MSG_seg_feature(nn.Module):
 
 
     def forward(self, batch_data):
-        assert pc.size()[2] == 6, 'illegal pc size:{}, pc must with normals'.format(pc.size())
         pc = batch_data['pc']
+        assert pc.size()[2] == 6, 'illegal pc size:{}, pc must with normals'.format(pc.size())
         pc_normals = pc[:, :, 3:]
         pc = pc[:, :, :3]
         one_hot_labels = batch_data['one_hot_labels'] # B x N x 16
