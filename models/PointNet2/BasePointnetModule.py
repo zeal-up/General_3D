@@ -63,6 +63,11 @@ class _BasePointnetMSGModule(nn.Module):
 
         return pc_sample, cat_feat
 
+class _BasePointnetSSGModule(_BasePointnetMSGModule):
+    def __init__(self, npoint:int, radiu:float, nsample:int, mlp:list):
+        super().__init__([npoint], [radiu], [nsample], [mlp])
+
+        
 
 class PointnetFPModule(nn.Module):
     def __init__(self, mlp:list[int]):

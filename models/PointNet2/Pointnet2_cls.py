@@ -6,6 +6,7 @@ import utils.pytorch_utils as pt_utils
 import models.model_utils as md_utils 
 
 from models.PointNet2.BasePointnetModule import _BasePointnetMSGModule
+from models.PointNet2.BasePointnetModule import _BasePointnetSSGModule
 
 class PointNet2MSG_cls_feature(nn.Module):
     def __init__(self):
@@ -49,6 +50,34 @@ class PointNet2MSG_cls_feature(nn.Module):
 
         feat = feat.squeeze(-1)
         feat = torch.max(feat, -1)[0]
+
+class PointNet2SSG_cls_feature(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        inchannel = 3
+        self.ssg1 = _BasePointnetSSGModule(512, 0.2, 32, [inchannel, 64, 64, 128])
+
+        inchannel = 128 + 3
+        self.ssg2 = _BasePointnetSSGModule(128, 0.4, 64, [inchannel, 128, 128, 256])
+
+        inchannel = 256 + 3
+        self.SA = pt_utils.SharedMLP([inchannel, 256, 512, 1024], bn=True)
+
+    def forward(self, pc):
+        assert pc.size()[2] == 3, 'illegal pc size : {}'.format(pc.size())
+
+        pc = pc.permute(0, 2, 1)
+        pc_sample, feat = self.ssg1(pc, None)
+        pc_sample, feat = self.ssg2(pc, feat)
+
+        pc_sample, feat = pc_sample.unsqueeze(-1), feat.unsqueeze(-1)
+        feat = self.SA(torch.cat([pc_sample, feat], dim=1))
+        feat = feat.squeeze(-1)
+        feat = torch.max(feat, -1)[0]
+
+        return feat
+        
 
 
 class Pointnet2MSG_cls_classifier(nn.Module):
