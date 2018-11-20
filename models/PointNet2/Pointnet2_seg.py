@@ -46,11 +46,12 @@ class Pointnet2MSG_seg_feature(nn.Module):
         assert pc.size()[2] == 6, 'illegal pc size:{}, pc must with normals'.format(pc.size())
         pc_normals = pc[:, :, 3:]
         pc = pc[:, :, :3]
-        one_hot_labels = batch_data['one_hot_labels'] # B x N x 16
+        one_hot_labels = batch_data['one_hot_labels'] # B x 16
+        B, N, _ = pc.size()
 
         
         pc = pc.permute(0, 2, 1)
-        one_hot_labels = one_hot_labels.permute(0, 2, 1)
+        one_hot_labels = one_hot_labels.unsqueeze(-1).expand(B, one_hot_labels.size()[1], N)
 
         L1_pc, L1_feat = self.msg1(pc, pc_normals)
         L2_pc, L2_feat = self.msg2(L1_pc, L1_feat)
