@@ -48,7 +48,7 @@ class Pointnet2MSG_seg_feature(nn.Module):
         pc_normals = pc[:, 3:, :]
         pc = pc[:, :3, :]
         one_hot_labels = batch_data['one_hot_labels'] # B x 16
-        B, N, _ = pc.size()
+        B, _, N = pc.size()
 
         
         
