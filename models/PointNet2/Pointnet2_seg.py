@@ -12,7 +12,7 @@ class Pointnet2MSG_seg_feature(nn.Module):
         super().__init__()
         self.num_classes = num_classes
 
-        inchannel = 3
+        inchannel = 6 # with normals
         self.msg1 = _BasePointnetMSGModule(
             npoint=512,
             radius=[0.1, 0.2, 0.4],
@@ -37,29 +37,37 @@ class Pointnet2MSG_seg_feature(nn.Module):
         inchannel = 256 + 64 + 128 + 128
         self.fp2 = PointnetFPModule(mlp=[inchannel, 256, 128])
 
-        inchannel = 128 + 3 + num_classes
+        inchannel = 128 + 6 + num_classes
         self.fp3 = PointnetFPModule(mlp=[inchannel, 128, 128])
 
 
     def forward(self, batch_data):
         pc = batch_data['pc']
-        one_hot_labels = batch_data['one_hot_labels'] # B x N x 16
-
-        assert pc.size()[2] == 3, 'illegal pc size:{}'.format(pc.size())
+        assert pc.size()[2] == 6, 'illegal pc size:{}, pc must with normals'.format(pc.size())
         pc = pc.permute(0, 2, 1)
-        one_hot_labels = one_hot_labels.permute(0, 2, 1)
+        pc_normals = pc[:, 3:, :]
+        pc = pc[:, :3, :]
+        one_hot_labels = batch_data['one_hot_labels'] # B x 16
+        B, _, N = pc.size()
 
-        L1_pc, L1_feat = self.msg1(pc, None)
-        L2_pc, L2_feat = self.msg2(L1_pc, L1_feat)
+        
+        
+        one_hot_labels = one_hot_labels.unsqueeze(-1).expand(B, one_hot_labels.size()[1], N)
 
-        L3_pc, L3_feat = L2_pc, self.SA(L2_feat.unsqueeze(-1)).squeeze(-1)
+        L1_pc, L1_feat = self.msg1(pc, pc_normals)
+        L2_pc, L2_feat = self.msg2(L1_pc, L1_feat) #B x C x n_2 
+
+        sa_feat = torch.cat([L2_feat, L2_pc], dim=1).unsqueeze(-1)
+        L3_pc, L3_feat = L2_pc, self.SA(sa_feat).squeeze(-1)
 
         up_feat1 = self.fp1(L3_pc, L2_pc, L3_feat, L2_feat)
 
         up_feat2 = self.fp2(L2_pc, L1_pc, up_feat1, L1_feat)
 
-        L0_feat = torch.cat([one_hot_labels, pc], dim=1)
+        L0_feat = torch.cat([one_hot_labels, pc, pc_normals], dim=1)
         up_feat3 = self.fp3(L1_pc, pc, up_feat2, L0_feat) # B x out_channel x N
+
+        return up_feat3
 
 class Pointnet2MSG_seg_classifier(nn.Module):
     def __init__(self, num_parts:int=50):

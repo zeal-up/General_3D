@@ -10,6 +10,7 @@ import argparse
 
 from models.DGCNN.Dgcnn_seg import DGCNN_seg_fullnet
 from models.SpiderCNN.SpiderCNN_seg import Spidercnn_seg_fullnet
+from models.PointNet2.Pointnet2_seg import Pointnet2MSG_seg_fullnet
 
 import utils.pytorch_utils as pt_utils
 import utils.data_utils as d_utils
@@ -125,6 +126,8 @@ if __name__ == "__main__":
         model = DGCNN_seg_fullnet(num_parts=50, num_classes=16)
     elif args.model_name == 'spidercnn':
         model = Spidercnn_seg_fullnet(num_parts=50)
+    elif args.model_name == 'pointnet2':
+        model = Pointnet2MSG_seg_fullnet(num_classes=16, num_parts=50)
     else:
         pass
 

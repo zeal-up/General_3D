@@ -11,7 +11,7 @@ from c_lib import QueryBallPoint
 
 class _BasePointnetMSGModule(nn.Module):
 
-    def __init__(self, npoint:int, radius:list[float], nsamples:list[int], mlps:list[list[int]]):
+    def __init__(self, npoint:int, radius:list, nsamples:list, mlps:list):
         '''
         npoint : point number for fps sampling
         nsamples : sample point numbers for each radius
@@ -43,13 +43,13 @@ class _BasePointnetMSGModule(nn.Module):
         feat_sample : B x outchannel x npoint 
         '''
         B, _, N = pc.size()
-        idx = self.fps(pc) # B x npoint
+        idx = self.fps(pc.permute(0,2,1).contiguous()) # B x npoint
         idx = idx.unsqueeze(1).expand(B, 3, self.npoint)
         pc_sample = torch.gather(pc, 2, idx) # B x 3 x npoint
         cat_feat = []
 
         for i in range(len(self.mlp_layers)):
-            indices, _ = self.query_ball_point[i](pc, pc_sample)
+            indices, _ = self.query_ball_point[i](pc.contiguous(), pc_sample.contiguous())
             grouped_pc = md_utils._indices_group(pc, indices) # B x 3 x npoint x nsample
             out_feat = grouped_pc
             if feat is not None: # feat will be None in the first layer
@@ -70,7 +70,7 @@ class _BasePointnetSSGModule(_BasePointnetMSGModule):
         
 
 class PointnetFPModule(nn.Module):
-    def __init__(self, mlp:list[int]):
+    def __init__(self, mlp:list):
         super().__init__()
         self.mlp = pt_utils.SharedMLP(mlp, bn=True)
 

@@ -51,6 +51,8 @@ class PointNet2MSG_cls_feature(nn.Module):
         feat = feat.squeeze(-1)
         feat = torch.max(feat, -1)[0]
 
+        return feat
+
 class PointNet2SSG_cls_feature(nn.Module):
     def __init__(self):
         super().__init__()
@@ -77,7 +79,6 @@ class PointNet2SSG_cls_feature(nn.Module):
         feat = torch.max(feat, -1)[0]
 
         return feat
-        
 
 
 class Pointnet2MSG_cls_classifier(nn.Module):
