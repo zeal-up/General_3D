@@ -11,7 +11,7 @@ from c_lib import QueryBallPoint
 
 class _BasePointnetMSGModule(nn.Module):
 
-    def __init__(self, npoint:int, radius:list, nsamples:list, mlps:list:
+    def __init__(self, npoint:int, radius:list, nsamples:list, mlps:list):
         '''
         npoint : point number for fps sampling
         nsamples : sample point numbers for each radius
