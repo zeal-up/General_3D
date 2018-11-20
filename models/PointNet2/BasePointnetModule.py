@@ -43,7 +43,7 @@ class _BasePointnetMSGModule(nn.Module):
         feat_sample : B x outchannel x npoint 
         '''
         B, _, N = pc.size()
-        idx = self.fps(pc.permute(0,2,1)) # B x npoint
+        idx = self.fps(pc.permute(0,2,1).contiguous()) # B x npoint
         idx = idx.unsqueeze(1).expand(B, 3, self.npoint)
         pc_sample = torch.gather(pc, 2, idx) # B x 3 x npoint
         cat_feat = []
