@@ -55,9 +55,10 @@ class Pointnet2MSG_seg_feature(nn.Module):
         one_hot_labels = one_hot_labels.unsqueeze(-1).expand(B, one_hot_labels.size()[1], N)
 
         L1_pc, L1_feat = self.msg1(pc, pc_normals)
-        L2_pc, L2_feat = self.msg2(L1_pc, L1_feat)
+        L2_pc, L2_feat = self.msg2(L1_pc, L1_feat) #B x C x n_2 
 
-        L3_pc, L3_feat = L2_pc, self.SA(L2_feat.unsqueeze(-1)).squeeze(-1)
+        sa_feat = torch.cat([L2_feat, L2_pc], dim=1).unsqueeze(-1)
+        L3_pc, L3_feat = L2_pc, self.SA(sa_feat).squeeze(-1)
 
         up_feat1 = self.fp1(L3_pc, L2_pc, L3_feat, L2_feat)
 
