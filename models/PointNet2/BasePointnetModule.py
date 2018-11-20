@@ -49,7 +49,7 @@ class _BasePointnetMSGModule(nn.Module):
         cat_feat = []
 
         for i in range(len(self.mlp_layers)):
-            indices, _ = self.query_ball_point[i](pc, pc_sample)
+            indices, _ = self.query_ball_point[i](pc.contiguous(), pc_sample.contiguous())
             grouped_pc = md_utils._indices_group(pc, indices) # B x 3 x npoint x nsample
             out_feat = grouped_pc
             if feat is not None: # feat will be None in the first layer
