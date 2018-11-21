@@ -113,7 +113,7 @@ class Pointnet2SSG_cls_fullnet(nn.Module):
 
     def forward(self, pc):
         feat = self.feature_extractor(pc)
-        feat = self.classifier(pc)
+        feat = self.classifier(feat)
 
         return feat
 
