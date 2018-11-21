@@ -59,7 +59,7 @@ class DGCNN_cls_feature(nn.Module):
         conv_feat = torch.cat([feat1, feat2, feat3, feat4], dim=1) 
         conv_feat = self.mlp(conv_feat)
 
-        conv_feat = conv_feat.squeeze()
+        conv_feat = conv_feat.squeeze(-1)
         conv_feat, _ = torch.max(conv_feat, -1) # B x 1024
 
         # conv_feat = conv_feat / conv_feat.norm(p=2, dim=1, keepdim=True)
