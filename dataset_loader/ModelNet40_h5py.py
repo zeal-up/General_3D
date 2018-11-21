@@ -4,6 +4,13 @@ import numpy as np
 import random
 import os, h5py
 
+def pc_normalize(pc):
+    l = pc.shape[0]
+    centroid = np.mean(pc, axis=0)
+    pc = pc - centroid
+    m = np.max(np.sqrt(np.sum(pc**2, axis=1)))
+    pc = pc / m
+    return pc
 
 def _get_data_filename(listfile):
     with open(listfile) as f:
@@ -13,11 +20,6 @@ class ModelNet40_h5(data.Dataset):
 
     def __init__(self, root, num_points, transforms=None, train=True):
         '''
-        3种模式：
-        mode=0 ： 载入train和test的所有数据
-        mode=1 ： 载入train数据
-        mode=2 ： 载入test数据
-
         输出：
         __getitems__ : points, label, idx
         '''
@@ -57,6 +59,7 @@ class ModelNet40_h5(data.Dataset):
         pt_idxs = np.arange(self.num_points)
         random.shuffle(pt_idxs)
         pc = current_points[pt_idxs, :]
+        pc = pc_normalize(pc)
         # print(pc.shape)
         if self.transforms is not None:
             pc = self.transforms(pc)

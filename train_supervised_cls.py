@@ -7,10 +7,7 @@ import torch.nn.functional as F
 from torchvision import transforms
 import os
 
-from models.DGCNN.Dgcnn_cls import DGCNN_cls_fullnet
-from models.SpiderCNN.SpiderCNN_cls import Spidercnn_cls_fullnet
-from models.PointNet2.Pointnet2_cls import Pointnet2MSG_cls_fullnet
-from models.PointNet2.Pointnet2_cls import Pointnet2SSG_cls_fullnet
+
 import utils.pytorch_utils as pt_utils
 import utils.data_utils as d_utils
 import argparse
@@ -142,15 +139,23 @@ if __name__ == "__main__":
     num_classes = train_set.num_classes
 
     if args.model_name == 'dgcnn':
+        from models.DGCNN.Dgcnn_cls import DGCNN_cls_fullnet
         model = DGCNN_cls_fullnet(num_classes=num_classes)
+
     elif args.model_name == 'spidercnn':
+        from models.SpiderCNN.SpiderCNN_cls import Spidercnn_cls_fullnet
         model = Spidercnn_cls_fullnet(withnor=True, num_classes=num_classes)
+
     elif args.model_name == 'pointnet2':
+        from models.PointNet2.Pointnet2_cls import Pointnet2SSG_cls_fullnet
         model = Pointnet2SSG_cls_fullnet(num_classes=num_classes)
+
     elif args.model_name == 'pointnet2msg':
+        from models.PointNet2.Pointnet2_cls import Pointnet2MSG_cls_fullnet
         model = Pointnet2MSG_cls_fullnet(num_classes=num_classes)
     else:
         assert False, 'illegal model name'
+        
     model = nn.DataParallel(model)
     if args.pre_trained is not None:
         model.load_state_dict(torch.load(args.pre_trained))

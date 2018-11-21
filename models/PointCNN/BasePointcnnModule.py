@@ -83,7 +83,7 @@ class _Basexconv(nn.Module):
 
         self.conv = nn.Sequential(
             nn.Conv2d(C_in+C_delta, (C_in+C_delta)*depth_multiplier, kernel_size=(1, K), groups=(C_in+C_delta)),
-            nn.ELU(inplace=True),
+            # nn.ELU(inplace=True),
             nn.BatchNorm2d((C_in+C_delta)*depth_multiplier),
             nn.Conv2d((C_in+C_delta)*depth_multiplier, C_out, kernel_size=1),
             nn.ELU(True),
