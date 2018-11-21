@@ -75,7 +75,7 @@ class PointNet2SSG_cls_feature(nn.Module):
 
         pc = pc.permute(0, 2, 1)
         pc_sample, feat = self.ssg1(pc, None)
-        pc_sample, feat = self.ssg2(pc, feat)
+        pc_sample, feat = self.ssg2(pc_sample, feat)
 
         pc_sample, feat = pc_sample.unsqueeze(-1), feat.unsqueeze(-1)
         feat = self.SA(torch.cat([pc_sample, feat], dim=1))
