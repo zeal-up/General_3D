@@ -56,6 +56,11 @@ class Trainer_cls(object):
                         data, target = batch_data[0], batch_data[1]
                     data, target = data.to(self.device), target.to(self.device)
                     output = self.model(data)
+
+                    if len(output.size()) == 3: # suitable for PointCNN
+                        _, _, P = output.size()
+                        target = target.unsqueeze(-1).expand(target.size()[0], P)
+
                     # print(data.size(), target.size(), output.size())
                     loss = self.loss_function(output, target)
                     self.optimizer.zero_grad()
@@ -134,6 +139,10 @@ class Trainer_cls(object):
                     data, target = batch_data[0], batch_data[1]
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
+
+                if len(output.size()) == 3:
+                    output = torch.mean(output, dim=-1) # B x num_classes
+
                 val_loss.update(self.loss_function(output, target).item(), n=output.size()[0])
                 val_acc.update(self._acc(output.data, target), n=output.size()[0])
         return val_acc.avg, val_loss.avg
