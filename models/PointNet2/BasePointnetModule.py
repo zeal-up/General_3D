@@ -51,7 +51,7 @@ class _BasePointnetMSGModule(nn.Module):
         for i in range(len(self.mlp_layers)):
             indices, _ = self.query_ball_point[i](pc.contiguous(), pc_sample.contiguous())
             grouped_pc = md_utils._indices_group(pc, indices) # B x 3 x npoint x nsample
-            out_feat = grouped_pc
+            out_feat = grouped_pc.contiguous()
             if feat is not None: # feat will be None in the first layer
                 grouped_feat = md_utils._indices_group(feat, indices) # B x C x npoint x nsample
                 out_feat = torch.cat([grouped_pc, grouped_feat], dim=1) # B x C+3 x npoint x nsample
