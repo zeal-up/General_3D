@@ -65,7 +65,7 @@ class _BasePointnetMSGModule(nn.Module):
 
 class _BasePointnetSSGModule(_BasePointnetMSGModule):
     def __init__(self, npoint:int, radiu:float, nsample:int, mlp:list):
-        super().__init__([npoint], [radiu], [nsample], [mlp])
+        super().__init__(npoint, [radiu], [nsample], [mlp])
 
         
 
