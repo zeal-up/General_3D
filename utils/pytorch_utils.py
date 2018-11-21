@@ -25,6 +25,7 @@ class SharedMLP(nn.Sequential):
             activation=nn.ReLU(inplace=True),
             preact: bool = False,
             first: bool = False,
+            act_before_bn = False,
             name: str = ""
     ):
         super().__init__()
@@ -38,7 +39,8 @@ class SharedMLP(nn.Sequential):
                     bn=(not first or not preact or (i != 0)) and bn,
                     activation=activation
                     if (not first or not preact or (i != 0)) else None,
-                    preact=preact
+                    preact=preact,
+                    act_before_bn=act_before_bn
                 )
             )
 
@@ -87,6 +89,7 @@ class _ConvBase(nn.Sequential):
             batch_norm=None,
             bias=True,
             preact=False,
+            act_before_bn=False,
             name=""
     ):
         super().__init__()
@@ -112,19 +115,31 @@ class _ConvBase(nn.Sequential):
                 bn_unit = batch_norm(out_size)
 
         if preact:
-            if bn:
-                self.add_module(name + 'bn', bn_unit)
-
-            if activation is not None:
-                self.add_module(name + 'activation', activation)
+            if act_before_bn:
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
+                if bn:
+                    self.add_module(name + 'bn', bn_unit)
+            else:
+                if bn:
+                    self.add_module(name + 'bn', bn_unit)
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
             self.add_module(name + 'conv', conv_unit)
         else:
             self.add_module(name + 'conv', conv_unit)
-            if bn:
-                self.add_module(name + 'bn', bn_unit)
+            
+            if act_before_bn:
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
+                if bn:
+                    self.add_module(name + 'bn', bn_unit)
+            else:
+                if bn:
+                    self.add_module(name + 'bn', bn_unit)
 
-            if activation is not None:
-                self.add_module(name + 'activation', activation)
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
 
 
 class Conv1d(_ConvBase):
@@ -142,6 +157,7 @@ class Conv1d(_ConvBase):
             init=nn.init.kaiming_normal,
             bias: bool = True,
             preact: bool = False,
+            act_before_bn = False,
             name: str = ""
     ):
         super().__init__(
@@ -157,6 +173,7 @@ class Conv1d(_ConvBase):
             batch_norm=BatchNorm1d,
             bias=bias,
             preact=preact,
+            act_before_bn=act_before_bn,
             name=name
         )
 
@@ -176,6 +193,7 @@ class Conv2d(_ConvBase):
             init=nn.init.xavier_uniform_,
             bias: bool = True,
             preact: bool = False,
+            act_before_bn = False,
             name: str = ""
     ):
         super().__init__(
@@ -191,6 +209,7 @@ class Conv2d(_ConvBase):
             batch_norm=BatchNorm2d,
             bias=bias,
             preact=preact,
+            act_before_bn=act_before_bn,
             name=name
         )
 
@@ -210,6 +229,7 @@ class Conv3d(_ConvBase):
             init=nn.init.kaiming_normal,
             bias: bool = True,
             preact: bool = False,
+            act_before_bn = False,
             name: str = ""
     ):
         super().__init__(
@@ -225,6 +245,7 @@ class Conv3d(_ConvBase):
             batch_norm=BatchNorm3d,
             bias=bias,
             preact=preact,
+            act_before_bn=act_before_bn,
             name=name
         )
 
@@ -240,6 +261,7 @@ class FC(nn.Sequential):
             bn: bool = False,
             init=None,
             preact: bool = False,
+            act_before_bn = False,
             name: str = ""
     ):
         super().__init__()
@@ -251,20 +273,36 @@ class FC(nn.Sequential):
             nn.init.constant_(fc.bias, 0)
 
         if preact:
-            if bn:
-                self.add_module(name + 'bn', BatchNorm1d(in_size))
+            if act_before_bn:
 
-            if activation is not None:
-                self.add_module(name + 'activation', activation)
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
+                if bn:
+                    self.add_module(name + 'bn', BatchNorm1d(in_size))
+            else:
+                if bn:
+                    self.add_module(name + 'bn', BatchNorm1d(in_size))
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
+
             self.add_module(name + 'fc', fc)
 
         else:
             self.add_module(name + 'fc', fc)
-            if bn:
-                self.add_module(name + 'bn', BatchNorm1d(out_size))
 
-            if activation is not None:
-                self.add_module(name + 'activation', activation)
+            if act_before_bn:
+
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
+                if bn:
+                    self.add_module(name + 'bn', BatchNorm1d(out_size))
+
+            else:
+                if bn:
+                    self.add_module(name + 'bn', BatchNorm1d(out_size))
+
+                if activation is not None:
+                    self.add_module(name + 'activation', activation)
 
 
 class _DropoutNoScaling(InplaceFunction):
