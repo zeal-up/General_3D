@@ -74,7 +74,7 @@ def parse_args():
     )
     parser.add_argument(
         '--model-name', type=str, default='dgcnn',
-        help='pointnet2, pointnet2msg, or dgcnn or spidercnn'
+        help='pointnet2, pointnet2msg, or dgcnn or spidercnn, pointcnn'
     )
     parser.add_argument(
         '--withnor', action='store_true', default=False,
@@ -153,6 +153,9 @@ if __name__ == "__main__":
     elif args.model_name == 'pointnet2msg':
         from models.PointNet2.Pointnet2_cls import Pointnet2MSG_cls_fullnet
         model = Pointnet2MSG_cls_fullnet(num_classes=num_classes)
+    elif args.model_name == 'pointcnn':
+        from models.PointCNN.Pointcnn_cls import Pointcnn_cls_fullnet
+        model = Pointcnn_cls_fullnet(num_classes=num_classes)
     else:
         assert False, 'illegal model name'
         
