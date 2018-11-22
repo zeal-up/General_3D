@@ -20,7 +20,7 @@ class random_indices(nn.Module):
         self.P = P
     def forward(self, pts):
         B, N, _ = pts.size() 
-        indice = torch.randint(low=0, high=N, size=(B, self.P), dtype=torch.long)
+        indice = torch.randint(low=0, high=N, size=(B, self.P), dtype=torch.long).to(pts)
         return indice
     
 
