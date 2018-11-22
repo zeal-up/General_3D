@@ -122,8 +122,8 @@ if __name__ == "__main__":
         train_set = ModelNet40_10_withnor(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True)
         test_set = ModelNet40_10_withnor(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False)
     else:
-        train_set = ModelNet40_h5(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True)
-        test_set = ModelNet40_h5(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False)
+        train_set = ModelNet40_h5(root='./dataset', transforms=transforms_train, num_points=args.num_points, train=True, random_sample=args.random_sample)
+        test_set = ModelNet40_h5(root='./dataset', transforms=transforms_test, num_points=args.num_points, train=False, random_sample=args.random_sample)
 
     train_loader = DataLoader(
         train_set,
