@@ -68,8 +68,9 @@ class Trainer_cls(object):
                     self.optimizer.step()
 
                     if batch % self.log_interval == 0:
-                        train_acc.update(self._acc(output.data, target), output.size()[0])
-                        train_loss.update(loss.item(), n=target.size()[0])
+                        correct, n = self._acc(output.data, target)
+                        train_acc.update(correct, n)
+                        train_loss.update(loss.item()*n, n)
                         print('Epoch {}: {}/{}  |train_loss:{:.4f}  |train_acc:{:.4F}%'.\
                             format(epoch, batch, len(self.train_loader), loss.item(), train_acc.val))
                         x_axis = round(epoch+batch/len(self.train_loader), 2)
@@ -143,8 +144,11 @@ class Trainer_cls(object):
                 if len(output.size()) == 3:
                     output = torch.mean(output, dim=-1) # B x num_classes
 
-                val_loss.update(self.loss_function(output, target).item(), n=output.size()[0])
-                val_acc.update(self._acc(output.data, target), n=output.size()[0])
+                correct, n = self._acc(output.data, target)
+                val_acc.update(correct, n)
+                loss = self.loss_function(output, target)
+                val_loss.update(loss*n, n)
+                
         return val_acc.avg, val_loss.avg
 
     def _acc(self, output, target, k=1):
@@ -156,13 +160,18 @@ class Trainer_cls(object):
         return : accuracy%
         '''
         with torch.no_grad():
-            if len(output.size()) == 3:
-                output = torch.mean(output, dim=-1)
+            if len(output.size()) == 3: #suitable for pointcnn 
+                assert len(target.size()) == 2
+                pred = torch.topk(output, k, dim=1)[1]
+                pred = pred.permute(0, 2, 1)
+                target = target.unsqueeze(-1)
+                correct = pred.eq(target).sum().item()
+                return correct, pred.size()[0]*pred.size()[1]
             pred = torch.topk(output, k, dim=1)[1]
             # print(pred.size(), output.size(), output.size()[0])
             correct = pred.eq(target.view(output.size()[0], 1)).sum().item()
             
-            return correct*100.0/output.size()[0]
+            return correct, pred.size()[0]
 
     def _checkpoint(self, epoch, loss, acc, name='./checkpoints/best_model.pth',):
         torch.save(self.model.state_dict(), name)
@@ -385,8 +394,8 @@ class AverageMeter(object):
         self.count = 0
 
     def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
+        self.val = float(val) / n
+        self.sum += val 
         self.count += n
         self.avg = self.sum / self.count
 
