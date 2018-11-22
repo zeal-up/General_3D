@@ -33,7 +33,7 @@ def parse_args():
         help="Batch size. Default is 32"
         )
     parser.add_argument(
-        "--weight-decay", type=float, default=1e-4,
+        "--weight-decay", type=float, default=1e-5,
         help="L2 regularization coeff. Default is 1e-4"
     )
     parser.add_argument(
