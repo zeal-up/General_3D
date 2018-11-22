@@ -156,7 +156,7 @@ class Trainer_cls(object):
         return : accuracy%
         '''
         with torch.no_grad():
-            if len(output.size() == 3):
+            if len(output.size()) == 3:
                 output = torch.mean(output, dim=-1)
             pred = torch.topk(output, k, dim=1)[1]
             # print(pred.size(), output.size(), output.size()[0])
