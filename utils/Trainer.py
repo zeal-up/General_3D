@@ -241,7 +241,7 @@ class Trainer_seg(object):
                     loss.backward()
                     self.optimizer.step()
 
-                    train_loss.update(loss.item(), n=target.size()[0])
+                    train_loss.update(loss.item()*target.size()[0], n=target.size()[0])
                     if batch % self.log_interval == 0:  
                         print('Epoch {}: {}/{}  |train_loss:{:.4f}'.\
                             format(epoch, batch, len(self.train_loader), loss.item()))
