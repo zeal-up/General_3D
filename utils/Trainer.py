@@ -69,10 +69,10 @@ class Trainer_cls(object):
 
                     if batch % self.log_interval == 0:
                         correct, n = self._acc(output.data, target)
-                        train_acc.update(correct, n)
+                        train_acc.update(correct*100.0, n)
                         train_loss.update(loss.item()*n, n)
                         print('Epoch {}: {}/{}  |train_loss:{:.4f}  |train_acc:{:.4F}%'.\
-                            format(epoch, batch, len(self.train_loader), loss.item(), train_acc.val))
+                            format(epoch, batch, len(self.train_loader), loss.item(), train_acc.val*100.0))
                         x_axis = round(epoch+batch/len(self.train_loader), 2)
                         self.viz.append_loss(loss.item(), x_axis, win_name='loss_win', id='train_loss')
                         self.viz.append_acc(train_acc.val, x_axis, win_name='acc_win', id='train_acc')
@@ -145,7 +145,7 @@ class Trainer_cls(object):
                     output = torch.mean(output, dim=-1) # B x num_classes
 
                 correct, n = self._acc(output.data, target)
-                val_acc.update(correct, n)
+                val_acc.update(correct*100.0, n)
                 loss = self.loss_function(output, target)
                 val_loss.update(loss*n, n)
                 
