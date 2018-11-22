@@ -18,7 +18,7 @@ def _get_data_filename(listfile):
 
 class ModelNet40_h5(data.Dataset):
 
-    def __init__(self, root, num_points, transforms=None, train=True):
+    def __init__(self, root, num_points, transforms=None, train=True, random_sample=False):
         '''
         输出：
         __getitems__ : points, label, idx
@@ -30,6 +30,7 @@ class ModelNet40_h5(data.Dataset):
         # url = "https://shapenet.cs.stanford.edu/media/modelnet40_ply_hdf5_2048.zip"
         self.data_dir = os.path.join(root, self.folder)
         self.num_points = num_points
+        self.random_sample = random_sample
         if train:
             self.files = \
                 _get_data_filename(os.path.join(self.data_dir, 'train_files.txt'))
@@ -56,8 +57,12 @@ class ModelNet40_h5(data.Dataset):
     def __getitem__(self, idx):
 
         current_points = self.points[idx].copy()
-        pt_idxs = np.arange(self.num_points)
-        random.shuffle(pt_idxs)
+        if self.random_sample:
+            pt_idxs = np.random.choice(current_points.shape[0], self.num_points, replace=False)
+            random.shuffle(pt_idxs)
+        else:
+            pt_idxs = np.arange(self.num_points)
+            random.shuffle(pt_idxs)
         pc = current_points[pt_idxs, :]
         pc = pc_normalize(pc)
         # print(pc.shape)

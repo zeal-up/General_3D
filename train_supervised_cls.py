@@ -81,6 +81,10 @@ def parse_args():
         help='whether to use normals'
     )
     parser.add_argument(
+        '--random-sample', action='store_true', default=False,
+        help='if ture, the pc is sample from all points. if False, the first 1024 point were sample'
+    )
+    parser.add_argument(
         '--optim', type=str, default='adam',
         help='what kind of optimizer to use, adam, sgd'
     )
