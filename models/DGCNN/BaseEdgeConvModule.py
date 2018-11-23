@@ -5,23 +5,24 @@ import utils.pytorch_utils as pt_utils
 
 
 class transform_net(nn.Module):
-    def __init__(self, K=3):
+    def __init__(self, K_channel=3, K_knn=20):
         '''
-        input : N x 6 x H x k, where k means kNN
+        input : B x 3 x N
         '''
         super().__init__()
         self.eps = 1e-3
-        self.K = K
+        self.K_channel = K_channel
+        self.K_knn = K_knn
 
-        self.conv1 = _baseEdgeConv(3, 64, k=K, pool=False) # B x 64 x N x k
+        self.conv1 = _baseEdgeConv(3, 64, k=K_knn, pool=False) # B x 64 x N x k
         self.conv2 = pt_utils.Conv2d(64, 128, bn=True)
         self.conv3 = pt_utils.Conv2d(128, 1024, bn=True)
 
         self.fc1 = pt_utils.FC(1024, 512, bn=True)
         self.fc2 = pt_utils.FC(512, 256, bn=True)
-        self.fc3 = nn.Linear(256, self.K*self.K)
+        self.fc3 = pt_utils.FC(256, self.K_channel**2, bn=False, activation=None)
         self.fc3.weight.data.fill_(0)
-        self.fc3.bias.data.copy_(torch.eye(self.K).view(-1).float())
+        self.fc3.bias.data.copy_(torch.eye(self.K_channel).view(-1).float())
 
 
     def forward(self, pc):
@@ -38,7 +39,7 @@ class transform_net(nn.Module):
 
         B, _ = conv_feat.size()
         
-        conv_feat = conv_feat.view(B, self.K, self.K)
+        conv_feat = conv_feat.view(B, self.K_channel, self.K_channel)
         
         return conv_feat
 
