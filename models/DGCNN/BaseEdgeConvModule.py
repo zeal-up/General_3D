@@ -21,8 +21,8 @@ class transform_net(nn.Module):
         self.fc1 = pt_utils.FC(1024, 512, bn=True)
         self.fc2 = pt_utils.FC(512, 256, bn=True)
         self.fc3 = pt_utils.FC(256, self.K_channel**2, bn=False, activation=None)
-        self.fc3.weight.data.fill_(0)
-        self.fc3.bias.data.copy_(torch.eye(self.K_channel).view(-1).float())
+        self.fc3.fc.weight.data.fill_(0)
+        self.fc3.fc.bias.data.copy_(torch.eye(self.K_channel).view(-1).float())
 
     def forward(self, pc):
         conv_feat = self.conv1(pc)  # B*64*N*k
