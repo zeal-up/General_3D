@@ -13,7 +13,7 @@ class DGCNN_cls_feature(nn.Module):
         self.eps = 1e-3
         self.k = k
         self.last_bn = last_bn
-        self.transform = transform_net(K=3)
+        self.transform = transform_net(K_channel=3, K_knn=self.k)
 
         # EdgeConv 1
         self.edgeconv1_1 = _baseEdgeConv(3, 64, k=k)
