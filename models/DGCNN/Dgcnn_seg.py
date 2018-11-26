@@ -13,7 +13,7 @@ class DGCNN_seg_feature(nn.Module):
         super().__init__()
         self.eps = 1e-3
         self.k = k
-        self.transform = transform_net(K=3)
+        self.transform = transform_net(K_channel=3, K_knn=k)
         self.num_classes = num_classes
 
         # EdgeConv 1

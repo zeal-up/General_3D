@@ -8,10 +8,6 @@ from torchvision import transforms
 import os
 import argparse
 
-from models.DGCNN.Dgcnn_seg import DGCNN_seg_fullnet
-from models.SpiderCNN.SpiderCNN_seg import Spidercnn_seg_fullnet
-from models.PointNet2.Pointnet2_seg import Pointnet2MSG_seg_fullnet
-
 import utils.pytorch_utils as pt_utils
 import utils.data_utils as d_utils
 
@@ -79,8 +75,8 @@ def parse_args():
         help="whether to use normals"
     )
     parser.add_argument(
-        '--model-name', type=str, default='dgcnn',
-        help='pointnet or dgcnn, spidercnn '
+        '--model-name', type=str, default='pointnet2ssg',
+        help='pointnet2ssg / pointnet2msg or dgcnn, spidercnn '
     )
 
     parser.add_argument('--visdom-port', type=int, default=8197)
@@ -123,10 +119,19 @@ if __name__ == "__main__":
 
 	# model
     if args.model_name == 'dgcnn':
+        from models.DGCNN.Dgcnn_seg import DGCNN_seg_fullnet
         model = DGCNN_seg_fullnet(num_parts=50, num_classes=16)
+
     elif args.model_name == 'spidercnn':
+        from models.SpiderCNN.SpiderCNN_seg import Spidercnn_seg_fullnet
         model = Spidercnn_seg_fullnet(num_parts=50)
-    elif args.model_name == 'pointnet2':
+    
+    elif args.model_name == 'pointnet2ssg':
+        from models.PointNet2.Pointnet2_seg import Pointnet2SSG_seg_fullnet
+        model = Pointnet2SSG_seg_fullnet(num_classes=16, num_parts=50)
+        
+    elif args.model_name == 'pointnet2msg':
+        from models.PointNet2.Pointnet2_seg import Pointnet2MSG_seg_fullnet
         model = Pointnet2MSG_seg_fullnet(num_classes=16, num_parts=50)
     else:
         pass
