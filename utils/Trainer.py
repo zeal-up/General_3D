@@ -33,7 +33,7 @@ class Trainer_cls(object):
         '''
 
         if test_loader is not None:
-            self.log_interval = int(len(self.train_loader)/100) 
+            self.log_interval = max(int(len(self.train_loader)/100) , 10)
             # evaluation 100 times per epoch
         else:
             self.log_interval = 10
