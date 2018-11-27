@@ -164,7 +164,7 @@ class Trainer_cls(object):
                 assert len(target.size()) == 2
                 output = output.permute(0, 2, 1)
                 pred = torch.topk(output, k, dim=-1)[1]
-                target = target.unsqueeze(-1).unsqueeze(-1)
+                target = target.unsqueeze(-1)
                 correct = pred.eq(target).sum().item()
                 return correct, pred.size()[0]*pred.size()[1]
             elif len(output.size()) == 2:
