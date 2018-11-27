@@ -64,7 +64,7 @@ class Pointcnn_cls_feature(nn.Module):
         sample_pc, feat = self.x_conv1(pc, None)
         sample_pc, feat = self.x_conv2(sample_pc, feat)
         sample_pc, feat = self.x_conv3(sample_pc, feat)
-        sample_pc, feat = self.x_conv4(sample_pc, feat)
+        sample_pc, feat = self.x_conv4(sample_pc, feat) 
 
         return feat # B x 480 x 128
 
@@ -83,7 +83,11 @@ class Pointcnn_cls_classifier(nn.Module):
     def forward(self, feat):
         scores = self.fc1(feat)
         scores = self.drop(self.fc2(scores))
-        scores = self.fc3(scores)
+        if self.training:
+            scores = self.fc3(scores)
+        else :
+            scores = torch.mean(scores, dim=-1, keepdim=True) # B x C x 1
+            scores = self.fc3(scores).squeeze(-1) # B x 40 x 1
 
         return scores # B x 40 x 128
 

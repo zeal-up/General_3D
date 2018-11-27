@@ -162,16 +162,18 @@ class Trainer_cls(object):
         with torch.no_grad():
             if len(output.size()) == 3: #suitable for pointcnn 
                 assert len(target.size()) == 2
-                pred = torch.topk(output, k, dim=1)[1]
-                pred = pred.permute(0, 2, 1)
-                target = target.unsqueeze(-1)
+                output = output.permute(0, 2, 1)
+                pred = torch.topk(output, k, dim=-1)[1]
+                target = target.unsqueeze(-1).unsqueeze(-1)
                 correct = pred.eq(target).sum().item()
                 return correct, pred.size()[0]*pred.size()[1]
-            pred = torch.topk(output, k, dim=1)[1]
-            # print(pred.size(), output.size(), output.size()[0])
-            correct = pred.eq(target.view(output.size()[0], 1)).sum().item()
-            
-            return correct, pred.size()[0]
+            elif len(output.size()) == 2:
+                pred = torch.topk(output, k, dim=1)[1]
+                # print(pred.size(), output.size(), output.size()[0])
+                correct = pred.eq(target.view(output.size()[0], 1)).sum().item()
+                return correct, pred.size()[0]
+            else:
+                assert False, 'illegal output size{}'.format(output.size())
 
     def _checkpoint(self, epoch, loss, acc, name='./checkpoints/best_model.pth',):
         torch.save(self.model.state_dict(), name)
