@@ -65,19 +65,23 @@ class _Basexconv(nn.Module):
             K*K,
             kernel_size=(1, K),
             bn=True,
+            bias=False,
             activation=nn.ELU(inplace=True),
             act_before_bn=True
             ) # B x K*K x P x 1
         
         self.X_transform1 = nn.Sequential(
-            nn.Conv2d(K, K*K, kernel_size=(1, K), groups=K),
+            nn.Conv2d(K, K*K, kernel_size=(1, K), groups=K, bias=False),
             nn.ELU(inplace=True),
             nn.BatchNorm2d(K*K)
         ) # B x K*K x P x 1
+        nn.init.xavier_uniform_(self.X_transform1[0].weight)
+
         self.X_transform2 = nn.Sequential(
-            nn.Conv2d(K, K*K, kernel_size=(1, K), groups=K),
+            nn.Conv2d(K, K*K, kernel_size=(1, K), groups=K, bias=False),
             nn.BatchNorm2d(K*K)
         ) # B x K*K x P x 1
+        nn.init.xavier_uniform_(self.X_transform2[0].weight)
 
         # depth_multiplier = torch.ceil(float(C_out)/(C_in + C_delta))
        
@@ -85,11 +89,13 @@ class _Basexconv(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(C_in+C_delta, (C_in+C_delta)*depth_multiplier, kernel_size=(1, K), groups=(C_in+C_delta)),
             # nn.ELU(inplace=True),
-            nn.BatchNorm2d((C_in+C_delta)*depth_multiplier),
-            nn.Conv2d((C_in+C_delta)*depth_multiplier, C_out, kernel_size=1),
+            # nn.BatchNorm2d((C_in+C_delta)*depth_multiplier),
+            nn.Conv2d((C_in+C_delta)*depth_multiplier, C_out, kernel_size=1, bias=False),
             nn.ELU(True),
             nn.BatchNorm2d(C_out)
         ) # equal to tf.layers.seperable_conv2d
+        nn.init.xavier_uniform_(self.conv[0].weight)
+        nn.init.xavier_uniform_(self.conv[1].weight)
 
         if self.with_global:
             self.conv_global = pt_utils.SharedMLP(
