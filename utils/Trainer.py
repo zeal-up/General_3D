@@ -209,7 +209,7 @@ class Trainer_seg(object):
         '''
 
         if test_loader is not None:
-            self.log_interval = int(len(self.train_loader)/100) 
+            self.log_interval = min(int(len(self.train_loader)/100) , 10)
             # log 100 times per epoch
         else:
             self.log_interval = 10
