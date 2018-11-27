@@ -95,7 +95,7 @@ def parse_args():
     return parser.parse_args()
 
 
-lr_clip = 1e-5
+lr_clip = 1e-6
 bnm_clip = 1e-2
 if __name__ == "__main__":
     args = parse_args()

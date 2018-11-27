@@ -127,6 +127,7 @@ class _Basexconv(nn.Module):
         X = self.X_transform1(X)
         X = X.view(B, self.K, self.P, self.K)
         X = self.X_transform2(X)
+        X = X.view(B, self.K, self.P, self.K) 
         X = X.view(B*self.P, self.K, self.K)
         fts_X = torch.bmm(nn_fts_input.permute(0,2,1,3).contiguous().view(B*self.P, -1, self.K), X)
         fts_X = fts_X.view(B, self.P, -1, self.K).permute(0, 2, 1, 3) # B x C_delta+C_in x P x K
