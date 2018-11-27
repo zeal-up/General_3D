@@ -87,7 +87,7 @@ class Pointcnn_cls_classifier(nn.Module):
             scores = self.fc3(scores)
         else :
             scores = torch.mean(scores, dim=-1, keepdim=True) # B x C x 1
-            scores = self.fc3(scores).squeeze(-1) # B x 40 x 1
+            scores = self.fc3(scores).squeeze(-1) # B x 40
 
         return scores # B x 40 x 128
 
