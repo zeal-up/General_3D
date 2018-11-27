@@ -131,7 +131,7 @@ if __name__ == "__main__":
         shuffle=True,
         num_workers=2,
         pin_memory=True,
-        drop_last=True
+        drop_last=False
     )
     test_loader = DataLoader(
         dataset=test_set,
